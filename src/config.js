@@ -1,0 +1,1 @@
+export const BASE_DOC = "http://localhost:8080"
