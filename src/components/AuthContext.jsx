@@ -19,7 +19,6 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    // setLoading(true);
     try {
       const response = await apiLogin.post('/auth', { email, password },{withCredentials:true});
       if (response.data.code === 200) {
@@ -46,14 +45,16 @@ export const AuthProvider = ({ children }) => {
         text: 'An unexpected error occurred. Please try again.',
       });
       console.error('Login failed:', error);
-    } finally {
-      setLoading(false);
+      throw error;
     }
   };
 
   const logout = async () => {
     try {
-      await apiLogin.post('/auth/logout',{withCredentials:true});
+      await apiLogin.post('/auth/logout',{},{
+        withCredentials:true,
+        headers: { 'Content-Type': 'application/json' }
+      });
       localStorage.removeItem('user')
 
     } catch (error) {

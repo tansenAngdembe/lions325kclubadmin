@@ -53,6 +53,10 @@ const AppRouter = () => {
         },
       ],
     },
+    {
+      path: '*',
+      element: <Navigate to={isLoggedIn ? '/' : '/login'} />,
+    },
   ]);
 
   return <RouterProvider router={router} />;

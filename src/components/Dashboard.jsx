@@ -37,14 +37,32 @@ const Dashboard = () => {
 
     setIsSubmitting(true);
     try {
-      await api.post('/add', formData, {
+      const response = await api.post('/add', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-      await fetchMembers(); // Re-fetch data
-      setIsAddModalOpen(false);
+      if (response.data && response.data.code === 201) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: response.data.message,
+        });
+        await fetchMembers(); // Re-fetch data
+        setIsAddModalOpen(false);
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: response.data.message || 'Failed to add member.',
+        });
+      }
     } catch (error) {
+       Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'An unexpected error occurred. Please try again.',
+      });
       console.error('Error adding member:', error);
     } finally {
       setIsSubmitting(false);

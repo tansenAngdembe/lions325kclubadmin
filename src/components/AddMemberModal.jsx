@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
-import { User, Mail, Phone, Hash, MapPin, Calendar, Image as ImageIcon } from 'lucide-react';
+import { User, Mail, Phone, Hash, MapPin, Calendar } from 'lucide-react';
 
 const AddMemberModal = ({ isOpen, onClose, onAddMember, isSubmitting }) => {
   const [formData, setFormData] = useState({
@@ -12,11 +12,27 @@ const AddMemberModal = ({ isOpen, onClose, onAddMember, isSubmitting }) => {
     dateOfBirth: '',
     image: null
   });
+  const [imagePreview, setImagePreview] = useState(null);
+
+  useEffect(() => {
+    // Cleanup the object URL on component unmount
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (name === 'image') {
-      setFormData(prev => ({ ...prev, image: files[0] }));
+    if (name === 'image' && files[0]) {
+      const file = files[0];
+      setFormData(prev => ({ ...prev, image: file }));
+      
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+      setImagePreview(URL.createObjectURL(file));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -70,10 +86,17 @@ const AddMemberModal = ({ isOpen, onClose, onAddMember, isSubmitting }) => {
               <input type="date" name="dateOfBirth" placeholder="Date of Birth" value={formData.dateOfBirth} onChange={handleChange} className="p-2 pl-10 border rounded w-full" />
             </div>
           </div>
-          <div className="relative mt-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Profile Image</label>
-            <span className="absolute left-3 top-9 text-gray-400"><ImageIcon size={18} /></span>
-            <input type="file" name="image" onChange={handleChange} className="mt-1 block w-full pl-10" />
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Profile Image</label>
+            <div className="flex items-center gap-4">
+              {imagePreview && (
+                <img src={imagePreview} alt="Profile Preview" className="w-20 h-20 rounded-full object-cover" />
+              )}
+              <label htmlFor="image-upload" className="cursor-pointer bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Upload Image
+              </label>
+              <input id="image-upload" name="image" type="file" className="sr-only" onChange={handleChange} />
+            </div>
           </div>
           <div className="flex justify-end space-x-4 mt-6">
             <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400" disabled={isSubmitting}>Cancel</button>
